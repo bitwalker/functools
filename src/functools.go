@@ -5,6 +5,14 @@ import (
     "reflect"
 )
 
+func init() {
+    Empty = func() *LinkedList {
+        var list LinkedList
+        list = func() *Node { return nil }
+        return &list
+    }()
+}
+
 // Anything: represents any possible type
 type Anything interface{}
 
@@ -183,11 +191,7 @@ func (list *LinkedList) Length() int {
     length := 0
     node := (*list)()
     for node != nil {
-        if node.Tail != nil {
-            node = (*node.Tail)()
-        } else {
-            node = nil
-        }
+        node = (*node.Tail)()
         length++
     }
     return length
@@ -224,10 +228,10 @@ func ToSlice(list *LinkedList) []Anything {
     node := (*list)()
     for i := 0; node != nil; i++ {
         result[i] = node.Head
-        if node.Tail != nil {
-            node = (*node.Tail)()
-        } else {
-            node = nil
+        node = (*node.Tail)()
+    }
+    return result
+}
         }
     }
     return result
@@ -285,10 +289,7 @@ func (list *LinkedList) Map(f Anything) *LinkedList {
         if node != nil {
             args := []reflect.Value{reflect.ValueOf(node.Head)}
             head := expr.Call(args)[0].Interface()
-            tail := Empty
-            if node.Tail != nil {
-                tail = node.Tail.Map(f)
-            }
+            tail := node.Tail.Map(f)
             return &Node{head, tail}
         }
         return nil
@@ -309,11 +310,7 @@ func (list *LinkedList) Reduce(f Anything, memo Anything) Anything {
     for node != nil {
         args := []reflect.Value{reflect.ValueOf(memo), reflect.ValueOf(node.Head)}
         memo = expr.Call(args)[0].Interface()
-        if node.Tail != nil {
-            node = (*node.Tail)()
-        } else {
-            node = nil
-        }
+        node = (*node.Tail)()
     }
     return memo
 }
