@@ -127,3 +127,193 @@ func AnythingToValues(items []Anything) []reflect.Value {
 	}
 	return values
 }
+
+// LinkedList is simply a pointer to a function which will return the first Node
+type LinkedList func() *Node
+
+// Empty denotes the end of the list. It is a Thunk which returns nil.
+var Empty *LinkedList
+
+/*
+   Every List is composed of Nodes. Each node contains a Head, or the
+   current value of this node; and a Tail, which is just another List
+*/
+type Node struct {
+	Head Anything
+	Tail *LinkedList
+}
+
+/* 
+   Creates a LinkedList from a head element and a tail Thunk, this is used
+   just like the `cons` operator in Lisp. You can chain Cons to build
+   a list, though it is quite verbose:
+
+   Example:
+       list := Cons("A", Cons("B", Cons("C", Empty)))
+*/
+func Cons(head Anything, tail *LinkedList) *LinkedList {
+	var list LinkedList
+	list = func() *Node {
+		return &Node{head, tail}
+	}
+	return &list
+}
+
+/*
+   Create a List from the provided arguments (or a slice using the ... syntax)
+
+   Example:
+       nums  := [...]int{1, 2, 3}
+       list  := List(1, 2, 3) // => [1, 2, 3]
+       list2 := List(nums...) // => [1, 2, 3]
+*/
+func List(elements ...Anything) *LinkedList {
+	result := Empty
+	if len(elements) > 0 {
+		result = Cons(elements[0], List(elements[1:]...))
+	}
+	return result
+}
+
+/*
+   Gets the length of the List. Calling this on an infinite list
+   will cause an endless loop. Care is required!
+*/
+func (list *LinkedList) Length() int {
+	length := 0
+	node := (*list)()
+	for node != nil {
+		if node.Tail != nil {
+			node = (*node.Tail)()
+		} else {
+			node = nil
+		}
+		length++
+	}
+	return length
+}
+
+/*
+   Converts a slice of any type to a LinkedList
+
+   Example:
+       nums := [...]int{1, 2, 3}
+       list := ToList(nums)
+
+*/
+func ToList(elements Anything) *LinkedList {
+	sliceType := reflect.TypeOf(elements)
+	result := Empty
+	if elements == nil || sliceType.Kind() != reflect.Slice {
+		panic("Attempted to call ToList on a value of the wrong type. Must be Slice.")
+	} else {
+		val := reflect.ValueOf(elements)
+		// Build the list in reverse
+		for i := val.Len() - 1; i >= 0; i-- {
+			result = Cons(val.Index(i).Interface(), result)
+		}
+	}
+	return result
+}
+
+/*
+   Converts a LinkedList to []Anything
+*/
+func ToSlice(list *LinkedList) []Anything {
+	result := make([]Anything, list.Length())
+	node := (*list)()
+	for i := 0; node != nil; i++ {
+		result[i] = node.Head
+		if node.Tail != nil {
+			node = (*node.Tail)()
+		} else {
+			node = nil
+		}
+	}
+	return result
+}
+
+/*
+   Returns a new LinkedList containing the first N elements.
+*/
+func (list *LinkedList) Take(n int) *LinkedList {
+	var taken LinkedList
+	taken = func() *Node {
+		if n > 0 {
+			node := (*list)()
+			if node != nil {
+				return &Node{node.Head, node.Tail.Take(n - 1)}
+			}
+		}
+		return nil
+	}
+	return &taken
+}
+
+/*
+   Returns a new LinkedList with the first n elements dropped.
+*/
+func (list *LinkedList) Drop(n int) *LinkedList {
+	var remaining LinkedList
+	remaining = func() *Node {
+		node := (*list)()
+		if node != nil {
+			if n > 0 {
+				n--
+				list = node.Tail
+				return remaining()
+			}
+			return node
+		}
+		return nil
+	}
+	return &remaining
+}
+
+/*
+   Maps a function to each element of a list. This is a lazy operation.
+
+   Example:
+       list := List(1, 2, 3)
+       squared := list.Map(func(x int) int { return x * x })
+*/
+func (list *LinkedList) Map(f Anything) *LinkedList {
+	expr := reflect.ValueOf(f)
+	var mapped LinkedList
+	mapped = func() *Node {
+		node := (*list)()
+		if node != nil {
+			args := []reflect.Value{reflect.ValueOf(node.Head)}
+			head := expr.Call(args)[0].Interface()
+			tail := Empty
+			if node.Tail != nil {
+				tail = node.Tail.Map(f)
+			}
+			return &Node{head, tail}
+		}
+		return nil
+	}
+	return &mapped
+}
+
+/*
+   Reduces the elements of a list to a single value.
+
+   Example:
+       list := List(1, 2, 3)
+       sum := list.Reduce(func(acc, x int) int { return acc + x }, 0) // => 6
+*/
+func (list *LinkedList) Reduce(f Anything, memo Anything) Anything {
+	expr := reflect.ValueOf(f)
+	node := (*list)()
+	for node != nil {
+		args := []reflect.Value{reflect.ValueOf(memo), reflect.ValueOf(node.Head)}
+		memo = expr.Call(args)[0].Interface()
+		if node.Tail != nil {
+			node = (*node.Tail)()
+		} else {
+			node = nil
+		}
+	}
+	return memo
+}
