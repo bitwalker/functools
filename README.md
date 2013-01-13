@@ -47,6 +47,8 @@ Drop(x int)
 
 If you have other tools you think belong in this package, by all means fork the repo and send a pull request. I'd like to make this a one stop shop for functional programming needs in Go.
 
+Right now I'm looking for help making the library more robust and error-proof. Currently, things are pretty fragile with no input validation whatsoever.
+
 ## License
 
 The MIT License (MIT)
