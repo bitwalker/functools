@@ -185,6 +185,23 @@ func List(elements ...Anything) *LinkedList {
 }
 
 /*
+   Create a list using a generator function.
+
+   Example:
+       doubles := Generate(2, func(x int) int { return x * 2 }) // => [2, 4...]
+*/
+func Generate(head, f Anything) *LinkedList {
+    generator := reflect.ValueOf(f)
+    var list LinkedList
+    list = func() *Node {
+        args := []reflect.Value{reflect.ValueOf(head)}
+        next := generator.Call(args)[0].Interface()
+        return &Node{head, Generate(next, f)}
+    }
+    return &list
+}
+
+/*
    Gets the length of the List. Calling this on an infinite list
    will cause an endless loop. Care is required!
 */
