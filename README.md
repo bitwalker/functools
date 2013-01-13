@@ -4,7 +4,7 @@ Functional programming tools for Go
 
 ## About
 
-This package provides you with the tools you need to perform high level manipulation of functions that you might be used to coming from other programming languages. Of particular note is the lack of an Apply function, for partially applying function arguments - which happens to be the first 'tool' I've added.
+This package provides you with the tools you need to perform high level manipulation of functions that you might be used to coming from other programming languages. Of particular note is the lack of an Apply function, for partially applying function arguments - which happens to be the first 'tool' I've added. Your best source for documentation is the source file itself, but I've broken down the basics below.
 
 ## Current Features
 
@@ -16,11 +16,15 @@ This package provides you with the tools you need to perform high level manipula
 
 **Compose**: Takes functions `f` and `g`, and returns a new function `fg` whose signature is: `fg(x) = f(g(x))`
 
-**ToList**: Creates a new LinkedList
+**ToList**: Converts a slice to a LinkedList
 
 **ToSlice**: Converts a LinkedList to a slice
 
-**LinkedList**: A traditional linked list structure where each node of the list contains it's current value (Head) and a pointer to the next node in the list (Tail). This enables nifty things like infinite sequences, and lazy evaluation.
+**List**: Creates a new LinkedList
+
+**Cons**: Prepend a value to a LinkedList
+
+**LinkedList**: A traditional linked list structure where each node of the list contains it's current value (Head) and a pointer to the next node in the list (Tail). This enables nifty things like infinite sequences, and lazy evaluation. Create one using `List`, or `Cons`.
 
 LinkedList currently supports the following methods:
 
