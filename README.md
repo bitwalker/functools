@@ -6,6 +6,43 @@ Functional programming tools for Go
 
 This package provides you with the tools you need to perform high level manipulation of functions that you might be used to coming from other programming languages. Of particular note is the lack of an Apply function, for partially applying function arguments - which happens to be the first 'tool' I've added.
 
+## Current Features
+
+#### Functions
+
+**Apply**: Partial application of function arguments
+
+**ApplyMulti**: Apply for functions with multiple return values
+
+**Compose**: Takes functions `f` and `g`, and returns a new function `fg` whose signature is: `fg(x) = f(g(x))`
+
+**ToList**: Creates a new LinkedList
+
+**ToSlice**: Converts a LinkedList to a slice
+
+**LinkedList**: A traditional linked list structure where each node of the list contains it's current value (Head) and a pointer to the next node in the list (Tail). This enables nifty things like infinite sequences, and lazy evaluation.
+
+LinkedList currently supports the following methods:
+
+```
+// The length of the list
+Length() int
+
+// Maps a function to every element of the list
+Map(func(x Anything) Anything) *LinkedList
+
+// Reduces a list to a value by applying the 
+// reducer to every element of the list.
+Reduce(func(acc, x Anything) Anything) Anything 
+
+// Take the first `x` elements of the list
+Take(x int)
+
+// Drop the first x elements of the list
+Drop(x int)
+```
+
+
 ## Contributing
 
 If you have other tools you think belong in this package, by all means fork the repo and send a pull request. I'd like to make this a one stop shop for functional programming needs in Go.
