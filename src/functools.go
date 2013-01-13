@@ -2,6 +2,7 @@
 package functools
 
 import (
+    "fmt"
     "reflect"
 )
 
@@ -232,8 +233,23 @@ func ToSlice(list *LinkedList) []Anything {
     }
     return result
 }
+
+/*
+   Render a list like a slice, e.g. [1, 2, 3]
+*/
+func (list *LinkedList) String() string {
+    result := "["
+    // Iterate over each node, until we hit Empty (nil)
+    node := (*list)()
+    for node != nil {
+        result += fmt.Sprintf("%v", node.Head)
+        node = (*node.Tail)()
+        // Tag a comma between intermediate elements
+        if node != nil {
+            result += ", "
         }
     }
+    result += "]"
     return result
 }
 
