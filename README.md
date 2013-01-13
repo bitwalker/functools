@@ -24,11 +24,16 @@ This package provides you with the tools you need to perform high level manipula
 
 **Cons**: Prepend a value to a LinkedList
 
+**Generate**: Create an infinite list given an initial value and a function that takes the previous value and generates the next one. For example, passing a function with the signature `f(x) => x * x` would create a list of values where each is the square of the element preceding it.
+
 **LinkedList**: A traditional linked list structure where each node of the list contains it's current value (Head) and a pointer to the next node in the list (Tail). This enables nifty things like infinite sequences, and lazy evaluation. Create one using `List`, or `Cons`.
 
 LinkedList currently supports the following methods:
 
 ```
+// View the list as a string
+String() string
+
 // The length of the list
 Length() int
 
