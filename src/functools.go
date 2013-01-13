@@ -85,6 +85,38 @@ func ApplyMulti(f Anything, args ...Anything) MultiFunction {
 }
 
 /*
+   Compose takes two functions, f1 and f2, and returns a new function
+   that when called, applies it's arguments to f2, then applies the
+   result as a single argument to f1, and then returns the result.
+
+   Example:
+       func Add(a, b int) int {
+           return a + b
+       }
+       func Square(x int) int {
+           return x * x
+       }
+
+       var SquareSum = Compose(Square, Add)
+
+       SquareSum(3, 3) // => 36
+*/
+func Compose(f1 Anything, f2 Anything) Function {
+	fn1 := reflect.ValueOf(f1)
+	fn2 := reflect.ValueOf(f2)
+
+	var composed Function
+	composed = func(args ...Anything) Anything {
+		values := AnythingToValues(args)
+		inside := fn2.Call(values)[0].Interface()
+		result := fn1.Call([]reflect.Value{reflect.ValueOf(inside)})[0].Interface()
+		return result
+	}
+
+	return composed
+}
+
+/*
    AnythingToValues is used to return a slice of reflected values
    for a slice of type Anything (which is really just interface{})
 */
